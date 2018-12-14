@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Accept flags | wixxx</title>
+    </head>
+    <body>
+        <form method="post" action="/accept-flags/{{ username }}/">
+            {% csrf_token %}
+            <input type="text" name="token" placeholder="Token"><br />
+            <textarea name="data" placeholder="wixxx data"></textarea><br />
+            <input type="submit" />
+        </form>
+    </body>
+</html>

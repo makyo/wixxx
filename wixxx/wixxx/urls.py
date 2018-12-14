@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from flags import views
+
 urlpatterns = [
+    path('', views.front),
+    path('request-nonce/<str:username>/', views.request_nonce),
+    path('accept-flags/<str:username>/', views.accept_flags),
     path('admin/', admin.site.urls),
 ]

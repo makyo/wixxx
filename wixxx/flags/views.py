@@ -3,9 +3,13 @@ import hashlib
 import random
 import re
 
+from django.contrib.auth.models import User
 from django.db.models import Count
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import (
+    get_object_or_404,
+    render,
+)
 
 from .models import (
     Character,
@@ -20,50 +24,64 @@ NAME_RE = re.compile(r'^\S+')
 def request_nonce(request, username):
     nonce = hashlib.sha256(str(random.randint(0, 100000)).encode()).hexdigest()
     user = get_object_or_404(User, username=username)
+    try:
+        user.token.delete()
+    except User.token.RelatedObjectDoesNotExist:
+        pass
     token = Token(
-        user=User, token=hashlib.sha256(
+        user=user, token=hashlib.sha256(
             '{}:{}'.format(
                 user.usersecret.secret, nonce).encode()).hexdigest())
     token.save()
     return HttpResponse(nonce, content_type='text/plain')
 
-def accept_flags(request, username, token):
+def accept_flags(request, username):
+    if request.method == 'GET':
+        return render(request, 'accept_flags_form.html', {
+            'username': username
+        })
     user = get_object_or_404(User, username=username)
-    if token != user.token.token:
-        return HttpResponse('Invalid token', content_type='text/plain')
+    token = request.POST.get('token')
+    try:
+        if token != user.token.token:
+            return HttpResponse('Invalid token', content_type='text/plain')
+        user.token.delete()
+    except User.token.RelatedObjectDoesNotExist:
+        return HttpResponse('Request token first', content_type='text/plain')
     raw = request.POST.get('data')
     if raw is None:
         return HttpResponse('Empty data', content_type='text/plain')
-    lines = raw.splitlines()[1:-1]
-    name = hashlib.sha256(NAME_RE.match(lines[0]).group().encode()).hexdigest()
-    flag_strings = functools.reduce(
-        lambda m, d: m + d.split(' '),
-        [LINE_RE.sub('\\1', line) for line in wi.splitlines()[1:-1]],
-        [])
-    flags = []
-    for flag_string in flag_strings:
-        try:
-            flag = Flag.objects.get(flag=flag_string)
-        except Flag.DoesNotExist:
-            flag = Flag(flag=flag_string)
-            flag.save()
-        flags.append(flag)
-    try:
-        character = Character.objects.get(name=name)
-    except Character.DoesNotExist:
-        character = Character(name=name)
-        character.save()
-    character.flags.set(flags)
+    lines = raw.strip().splitlines()[1:-1]
+    character = None
+    for line in lines:
+        name_raw = NAME_RE.match(line)
+        if name_raw:
+            name = hashlib.sha256(name_raw.group().encode()).hexdigest()
+            try:
+                character = Character.objects.get(name=name)
+            except Character.DoesNotExist:
+                character = Character(name=name)
+                character.save()
+            character.flags.clear()
+        flag_strings = LINE_RE.sub('\\1', line).split(' ')
+        for flag_string in flag_strings:
+            if len(flag_string) == 0:
+                continue
+            try:
+                flag = Flag.objects.get(flag=flag_string)
+            except Flag.DoesNotExist:
+                flag = Flag(flag=flag_string)
+                flag.save()
+            character.flags.add(flag)
     for flag in Flag.objects.annotate(count=Count('character'))\
             .filter(count=0):
         flag.delete()
 
     return HttpResponse('success', content_type='text/plain')
 
-
 def front(request):
-    response = 'flag,count\n'
+    response = []
     for flag in Flag.objects.annotate(count=Count('character'))\
             .order_by('-count'):
-        response = '{},{}\n'.format(flag.flag, flag.count)
-    return HttpResponse(response, content_type='text/plain')
+        response.append({'flag': flag.flag, 'count': flag.count})
+    return render(request, 'front.html', {'data': response})

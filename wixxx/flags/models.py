@@ -8,7 +8,7 @@ class Flag(models.Model):
 
     class Meta:
 
-        indexes = ['flag']
+        indexes = [models.Index(fields=['flag'])]
 
 
 class Character(models.Model):
@@ -18,7 +18,7 @@ class Character(models.Model):
 
     class Meta:
         
-        indexes = ['name']
+        indexes = [models.Index(fields=['name'])]
 
 
 class Token(models.Model):

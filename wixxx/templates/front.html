@@ -1,0 +1,16 @@
+{% load multiply %}
+<html>
+    <head>
+        <title>wixxx</title>
+    </head>
+    <body>
+        <svg viewbox="0 0 960 {{ data|length|multiply:14 }}">
+            {% for datum in data %}
+            <g transform="translate(0, {{ forloop.counter0|multiply:14 }})">
+                <rect x="0" y="0" height="13" width="{{ datum.count|multiply:2 }}" />
+                <text x="{{ datum.count|multiply:2|add:5 }}" y="13">{{ datum.flag }}</text>
+            </g>
+            {% endfor %}
+        </svg>
+    </body>
+</html>

@@ -21,6 +21,7 @@ from .models import (
 
 LINE_RE = re.compile(r'^\S*\s+(\S)')
 NAME_RE = re.compile(r'^\S+')
+URL_RE = re.compile(r'.+\..{2}.*/.+')
 
 def request_nonce(request, username):
     nonce = hashlib.sha256(str(random.randint(0, 100000)).encode()).hexdigest()
@@ -57,6 +58,8 @@ def accept_flags(request, username):
     character = Character()
     flags = []
     for line in lines:
+        if line.startswith('--'):
+            continue
         name_raw = NAME_RE.match(line)
         if name_raw:
             name = hashlib.sha256(name_raw.group().encode()).hexdigest()
@@ -71,6 +74,8 @@ def accept_flags(request, username):
         flag_strings = LINE_RE.sub('\\1', line).split(' ')
         for flag_string in flag_strings:
             if len(flag_string) == 0:
+                continue
+            if URL_RE.match(flag_string) is not None:
                 continue
             try:
                 flag = Flag.objects.get(flag=flag_string)

@@ -1,5 +1,6 @@
 import argparse
 import hashlib
+import os
 import requests
 
 
@@ -20,10 +21,14 @@ def parse_args():
         output (and nothing else)''')
     parser.add_argument(
         'user',
-        help='Your username on the wixxx server')
+        nargs='?',
+        help='Your username on the wixxx server',
+        default=os.environ.get('WIXXX_USER'))
     parser.add_argument(
         'secret',
-        help='Your user secret (not your password) on the wixxx server')
+        nargs='?',
+        help='Your user secret (not your password) on the wixxx server',
+        default=os.environ.get('WIXXX_SECRET'))
     return parser.parse_args()
 
 def main(options):
@@ -34,7 +39,7 @@ def main(options):
         'token': token,
         'data': options.logfile.read(),
     })
-    print(post_request.content)
+    print(post_request.content.decode('utf-8'))
 
 if __name__ == '__main__':
     args = parse_args()

@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
     "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 {% load multiply %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ data.0.count|multiply:4|add:10 }}" height="{{ data|length|multiply:15|add:5 }}" viewbox="0 0 {{ data.0.count|multiply:4|add:10 }} {{ data|length|multiply:15|add:5 }}">
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ data.0|width }}" height="{{ data|length|multiply:15|add:5 }}" viewbox="0 0 {{ data.0.count|multiply:4|add:10 }} {{ data|length|multiply:15|add:5 }}">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" />
     <style>
     svg {

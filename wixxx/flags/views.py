@@ -10,6 +10,7 @@ from django.shortcuts import (
     get_object_or_404,
     render,
 )
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import (
     Character,
@@ -35,6 +36,7 @@ def request_nonce(request, username):
     token.save()
     return HttpResponse(nonce, content_type='text/plain')
 
+@csrf_exempt
 def accept_flags(request, username):
     if request.method == 'GET':
         return render(request, 'accept_flags_form.html', {

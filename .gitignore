@@ -1,4 +1,5 @@
 venv
+client-venv
 *.sqlite3
 *.sw[op]
 __pycache__

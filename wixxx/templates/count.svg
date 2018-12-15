@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+{% load multiply %}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ data.0.count|multiply:4|add:10 }}" height="{{ data|length|multiply:15|add:5 }}" viewbox="0 0 {{ data.0.count|multiply:4|add:10 }} {{ data|length|multiply:15|add:5 }}">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" />
+    <style>
+    svg {
+        font-family: "Ubuntu Mono", monospace;
+    }
+    svg rect {
+        stroke-width: 0px;
+        fill: #222;
+    }
+    svg text {
+        stroke-width: 0px;
+        fill: #222;
+        font-size: 10pt;
+        dominant-baseline: central;
+    }
+    </style>
+    {% for datum in data %}
+    <g transform="translate(5, {{ forloop.counter0|multiply:15|add:5 }})">
+        <rect x="0" y="0" height="14" width="{{ datum.count|multiply:2 }}" />
+        <text x="{{ datum.count|multiply:2|add:7 }}" y="6">{{ datum.flag }}</text>
+    </g>
+    {% endfor %}
+</svg>

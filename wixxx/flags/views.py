@@ -52,17 +52,20 @@ def accept_flags(request, username):
     if raw is None:
         return HttpResponse('Empty data', content_type='text/plain')
     lines = raw.strip().splitlines()[1:-1]
-    character = None
+    character = Character()
+    flags = []
     for line in lines:
         name_raw = NAME_RE.match(line)
         if name_raw:
             name = hashlib.sha256(name_raw.group().encode()).hexdigest()
+            if character.id and name != character.name:
+                character.flags.set(flags)
+                flags = []
             try:
                 character = Character.objects.get(name=name)
             except Character.DoesNotExist:
                 character = Character(name=name)
                 character.save()
-            character.flags.clear()
         flag_strings = LINE_RE.sub('\\1', line).split(' ')
         for flag_string in flag_strings:
             if len(flag_string) == 0:
@@ -72,16 +75,19 @@ def accept_flags(request, username):
             except Flag.DoesNotExist:
                 flag = Flag(flag=flag_string)
                 flag.save()
-            character.flags.add(flag)
+            flags.append(flag)
     for flag in Flag.objects.annotate(count=Count('character'))\
             .filter(count=0):
         flag.delete()
 
     return HttpResponse('success', content_type='text/plain')
 
-def front(request):
+def count_svg(request):
     response = []
     for flag in Flag.objects.annotate(count=Count('character'))\
             .order_by('-count'):
         response.append({'flag': flag.flag, 'count': flag.count})
-    return render(request, 'front.html', {'data': response})
+    return render(request, 'count.svg', {'data': response}, content_type="image/svg+xml")
+
+def front(request):
+    return render(request, 'front.html', {})

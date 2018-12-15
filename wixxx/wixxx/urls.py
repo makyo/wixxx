@@ -20,6 +20,7 @@ from flags import views
 
 urlpatterns = [
     path('', views.front),
+    path('count.svg', views.count_svg),
     path('request-nonce/<str:username>/', views.request_nonce),
     path('accept-flags/<str:username>/', views.accept_flags),
     path('admin/', admin.site.urls),

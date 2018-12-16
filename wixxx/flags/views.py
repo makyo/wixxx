@@ -22,6 +22,52 @@ from .models import (
 LINE_RE = re.compile(r'^\S*\s+(\S)')
 NAME_RE = re.compile(r'^\S+')
 URL_RE = re.compile(r'.+\..{2}.*/.+')
+NO_RE = re.compile(r'no (\S+)')
+WHITELIST = [
+   'available','anything-goes','ageplay',
+    'alt-having','anal','avian-preferre','aquatic',
+    'bisexual','biting','blood','body-modificat',
+    'bondage','bottom','breath-control','breeding',
+    'boots','castration','C&BT','chemical',
+    'chastity','cinfo','cunt-loving','cum-covered',
+    'cum-loving','cock-worshippi','consensual-onl','crossdresser',
+    'cuckolding','cunt-worshipin','dominant','diapers',
+    'dirty-talk','disobedient','discipline','dyes',
+    'edible','electrical','emasculation','enema',
+    'exhibitionist','experienced','female-biased','fear',
+    'foot-fetish','F-List','feminization','fur-preferred',
+    'forcedshifting','fisting','food-fetish','fuckable',
+    'homosexual','gendershifting','group-sex','heterosexual',
+    'herm-biased','horny','humiliation','humor-and-come',
+    'hypnosis','inexperienced','Always-IC','inflation',
+    'in-heat','incest','infantilist','intelligence-b',
+    'masturbating','lecherous','large','lactate',
+    'latex','leather','leashable','lesbian',
+    'loose','male-biased','macrophile','magic-sex',
+    'masochist','mated','microphile','mind-control',
+    'monogamous','muscle','mummification','non-morphic',
+    'nonconsensual','non-sexual','nipple-torture','nullification',
+    'objectificatio','orgasm-denial','Always-OOC','oral',
+    'oviposition','owned','owner-consent','pansexual',
+    'no-pages','pet','piercing','plants',
+    'plushophile','polyamorous','public-propert','predator',
+    'pregnophile','private','prey','panty-fetish',
+    'public','rimming','romantic','rpwi',
+    'sadist','scat','shapeshifting','shaving',
+    'sheaths','shy','size-queen','slutty',
+    'slave','small','sex-machines','scentplay',
+    'snuff','scale-preferre','spanking','strapons',
+    'submissive','switch','sex-doll','tantric',
+    'tattoo(ing)','teasing','tentacles','tickling',
+    'breast-loving','top','toys','trainable',
+    'transformation','unavailable','unbirthing','uppity',
+    'vampirism','vanilla','virgin','vorarephile',
+    'voyeur','watersports','wet-and-messy','no-whispers',
+    'xeno-preferred','yiffy','zoophile',
+]
+_NO = ['no-' + i for i in WHITELIST]
+WHITELIST = WHITELIST + _NO
+
 
 def request_nonce(request, username):
     nonce = hashlib.sha256(str(random.randint(0, 100000)).encode()).hexdigest()
@@ -71,6 +117,7 @@ def accept_flags(request, username):
             except Character.DoesNotExist:
                 character = Character(name=name)
                 character.save()
+        line = NO_RE.sub('no-\\1', line)
         flag_strings = LINE_RE.sub('\\1', line).split(' ')
         for flag_string in flag_strings:
             if len(flag_string) == 0:
@@ -91,10 +138,12 @@ def accept_flags(request, username):
 
 def count_svg(request):
     response = []
-    for flag in Flag.objects.annotate(count=Count('character'))\
-            .order_by('-count'):
+    qs = Flag.objects.annotate(count=Count('character'))
+    if request.GET.get('no-whitelist') is None:
+        qs = qs.filter(flag__in=WHITELIST)
+    for flag in qs.order_by('-count'):
         response.append({'flag': flag.flag, 'count': flag.count})
     return render(request, 'count.svg', {'data': response}, content_type="image/svg+xml")
 
 def front(request):
-    return render(request, 'front.html', {})
+    return render(request, 'front.html', {'no_whitelist': request.GET.get('no-whitelist')})

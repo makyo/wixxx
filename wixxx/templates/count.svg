@@ -18,9 +18,12 @@
         font-size: 10pt;
         dominant-baseline: central;
     }
+    svg .no-whitelist * {
+        fill: #888;
+    }
     </style>
     {% for datum in data %}
-    <g transform="translate(5, {{ forloop.counter0|multiply:15|add:5 }})">
+    <g class="{% if datum.flag not in whitelist %}no-{% endif %}whitelist" transform="translate(5, {{ forloop.counter0|multiply:15|add:5 }})">
         <rect x="0" y="0" height="14" width="{{ datum.count|multiply:2 }}" />
         <text x="{{ datum.count|multiply:2|add:7 }}" y="6">{{ datum.flag }}</text>
     </g>

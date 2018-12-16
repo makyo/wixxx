@@ -143,7 +143,10 @@ def count_svg(request):
         qs = qs.filter(flag__in=WHITELIST)
     for flag in qs.order_by('-count'):
         response.append({'flag': flag.flag, 'count': flag.count})
-    return render(request, 'count.svg', {'data': response}, content_type="image/svg+xml")
+    return render(request, 'count.svg', {
+        'data': response,
+        'whitelist': WHITELIST,
+    }, content_type="image/svg+xml")
 
 def front(request):
     return render(request, 'front.html', {'no_whitelist': request.GET.get('no-whitelist')})

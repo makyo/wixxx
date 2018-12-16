@@ -132,6 +132,7 @@ def accept_flags(request, username):
                 flag = Flag(flag=flag_string)
                 flag.save()
             flags.append(flag)
+    character.flags.set(flags)
     for flag in Flag.objects.annotate(count=Count('character'))\
             .filter(count=0):
         flag.delete()

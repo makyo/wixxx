@@ -103,6 +103,8 @@ def accept_flags(request, username):
     lines = raw.strip().splitlines()[1:-1]
     character = Character()
     flags = []
+    character_start = Character.objects.count()
+    flag_start = Flag.objects.count()
     for line in lines:
         if line.startswith('--'):
             continue
@@ -134,7 +136,9 @@ def accept_flags(request, username):
             .filter(count=0):
         flag.delete()
 
-    return HttpResponse('success', content_type='text/plain')
+    return HttpResponse('success: {} characters added, {} flags added'.format(
+        Character.objects.count() - character_start,
+        Flag.objects.count() - flag_start), content_type='text/plain')
 
 def count_svg(request):
     response = []

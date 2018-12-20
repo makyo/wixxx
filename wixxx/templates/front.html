@@ -1,3 +1,4 @@
+{% load multiply %}
 <html>
     <head>
         <title>wixxx</title>
@@ -6,18 +7,41 @@
         <style>
         body {
             font-family: "Ubuntu Mono", monospace;
+            color: #222;
         }
         h1 {
             text-align: center;
         }
-        img {
+        svg {
             display: block;
             margin: 0 auto;
+            width: {{ data|width }}px;
+        }
+        svg rect {
+            stroke-width: 0px;
+            fill: currentColor;
+        }
+        svg text {
+            stroke-width: 0px;
+            fill: currentColor;
+            font-size: 10pt;
+            dominant-baseline: central;
+        }
+        svg .no-whitelist * {
+            fill: rgba(0, 0, 0, 0.5);
         }
         </style>
     </head>
     <body>
         <h1>wixxx</h1>
-        <img src="/count.svg{% if no_whitelist %}?no-whitelist=1{% endif %}" />
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 {{ data|width }} {{ data|length|multiply:15|add:5 }}">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" />
+    {% for datum in data %}
+    <g class="{% if datum.flag not in whitelist %}no-{% endif %}whitelist" transform="translate(5, {{ forloop.counter0|multiply:15|add:5 }})">
+        <rect x="0" y="0" height="14" width="{{ datum.count|multiply:2 }}" />
+        <text x="{{ datum.count|multiply:2|add:7 }}" y="6">{{ datum.flag }}</text>
+    </g>
+    {% endfor %}
+</svg>
     </body>
 </html>

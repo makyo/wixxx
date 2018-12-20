@@ -154,4 +154,14 @@ def count_svg(request):
     }, content_type="image/svg+xml")
 
 def front(request):
-    return render(request, 'front.html', {'no_whitelist': request.GET.get('no-whitelist')})
+    response = []
+    qs = Flag.objects.annotate(count=Count('character'))
+    if request.GET.get('no-whitelist') is None:
+        qs = qs.filter(flag__in=WHITELIST)
+    for flag in qs.order_by('-count'):
+        response.append({'flag': flag.flag, 'count': flag.count})
+    return render(request, 'front.html', {
+        'data': response,
+        'whitelist': WHITELIST,
+    })
+

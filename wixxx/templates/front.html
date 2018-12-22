@@ -1,4 +1,4 @@
-{% load multiply %}
+{% load scale %}
 <html>
     <head>
         <title>wixxx</title>
@@ -36,12 +36,15 @@
         <h1>wixxx</h1>
 <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 {{ data|width }} {{ data|length|multiply:15|add:5 }}">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" />
+    {% with numbers=data|num_width %}
     {% for datum in data %}
     <g class="{% if datum.flag not in whitelist %}no-{% endif %}whitelist" transform="translate(5, {{ forloop.counter0|multiply:15|add:5 }})">
-        <rect x="0" y="0" height="14" width="{{ datum.count|multiply:2 }}" />
-        <text x="{{ datum.count|multiply:2|add:7 }}" y="6">{{ datum.flag }}</text>
+        <text x="{{ numbers }}" y="6" text-anchor="end">{{ datum.count }}</text>
+        <rect x="{{ numbers|add:5 }}" y="0" height="14" width="{{ data|scale:datum }}" />
+        <text x="{{ data|scale:datum|add:10|add:numbers }}" y="6">{{ datum.flag }}</text>
     </g>
     {% endfor %}
+    {% endwith %}
 </svg>
     </body>
 </html>
